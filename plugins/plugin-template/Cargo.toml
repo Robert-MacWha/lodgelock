@@ -7,3 +7,11 @@ edition = "2024"
 tlock-pdk = { workspace = true }
 tracing = { workspace = true }
 tracing-subscriber = { workspace = true }
+
+[package.metadata.wasm-pack.profile.release]
+wasm-opt = [
+    "-O",
+    "--debuginfo",
+    "--enable-bulk-memory",
+    "--enable-nontrapping-float-to-int",
+]

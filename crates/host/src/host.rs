@@ -104,11 +104,11 @@ pub enum UserResponse {
 
 #[derive(Error, Debug)]
 pub enum PluginError {
-    #[error("reqwest error")]
+    #[error("reqwest error: {0}")]
     ReqwestError(#[from] reqwest::Error),
-    #[error("Pdk error")]
+    #[error("Pdk error: {0}")]
     PdkError(#[from] wasmi_plugin_hdk::plugin::PluginError),
-    #[error("Rpc error")]
+    #[error("Rpc error: {0}")]
     RpcError(#[from] RpcError),
 }
 

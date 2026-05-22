@@ -54,7 +54,7 @@ struct State {
     page_id: PageId,
 }
 
-const RPC_URL: &str = "https://1rpc.io/eth";
+const RPC_URL: &str = "https://mainnet.gateway.tenderly.co/1L6YP1qxojaRQ0wz8ixCgy";
 const PROVIDER_KEY: &str = "revm_fork_provider";
 const FORK_RESET_TIMESTAMP_KEY: &str = "revm_fork_provider/last_reset_timestamp";
 

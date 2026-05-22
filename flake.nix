@@ -52,9 +52,11 @@
               # Rust toolchain and extensions
               rustToolchain
               rustfmtNightly
+              pkgs.cargo-bloat
 
               pkgs.wabt
               pkgs.wasm-tools
+              pkgs.twiggy
 
               # Dioxus CLI
               pkgs.dioxus-cli

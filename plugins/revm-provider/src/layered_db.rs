@@ -84,7 +84,6 @@ impl<ExtDB: DatabaseRef, N: Network> DatabaseRef for LayeredDB<ExtDB, N> {
     }
 
     fn code_by_hash_ref(&self, code: B256) -> Result<Bytecode, Self::Error> {
-        // TODO: If this becomes a performance bottleneck, consider caching code in a HashMap
         for layer in self.layers.iter().rev() {
             for account in layer.state.values() {
                 if account.info.code_hash == code

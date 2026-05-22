@@ -7,6 +7,7 @@ members = [
     "crates/tlock-pdk",
     "crates/erc20s",
     "frontend",
+    "tui",
     "plugins/eoa-coordinator",
     "plugins/eoa-vault",
     "plugins/plugin-template",
@@ -59,13 +60,13 @@ console_error_panic_hook = "0.1"
 event-listener = "5"
 js-sys = "=0.3.85"
 
-[profile.release]
-lto = "thin"
-opt-level = 3
+[profile.release-wasm]
+inherits = "release"
+opt-level = "z"
+lto = true
 codegen-units = 1
 panic = "abort"
-strip = "none"
-debug = "line-tables-only"
+strip = true
 
 [profile.dev]
 debug = true

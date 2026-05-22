@@ -3,7 +3,7 @@
 
 # Build an arbitrary plugin: `PLUGIN=plugin_name make plugin`
 plugin:
-	cargo build --target wasm32-wasip1 -p $(PLUGIN) --release
+	cargo build --target wasm32-wasip1 -p $(PLUGIN) --profile release-wasm
 
 # Build all plugins (automatically discovers plugins in plugins/ directory)
 plugins:
@@ -23,15 +23,19 @@ plugins-release:
 		if [ -f "$$dir/Cargo.toml" ]; then
 			plugin_name=$$(basename $$dir)
 			echo "Building plugin: $$plugin_name"
-			cargo build --target wasm32-wasip1 -p $$plugin_name --release
+			cargo build --target wasm32-wasip1 -p $$plugin_name  --profile release-wasm
 			wasm-opt -O3 \
 				--debuginfo \
-				target/wasm32-wasip1/release/$$plugin_name.wasm \
-				-o target/wasm32-wasip1/release/$$plugin_name.wasm
+				--enable-bulk-memory-opt \
+				--enable-nontrapping-float-to-int \
+				target/wasm32-wasip1/release-wasm/$$plugin_name.wasm \
+				-o target/wasm32-wasip1/release-wasm/$$plugin_name.wasm
 			wasm-tools demangle \
-				target/wasm32-wasip1/release/$$plugin_name.wasm \
-				-o target/wasm32-wasip1/release/$$plugin_name.wasm; \
-			cp target/wasm32-wasip1/release/$$plugin_name.wasm frontend/public/plugins/$$plugin_name.wasm
+				target/wasm32-wasip1/release-wasm/$$plugin_name.wasm \
+				-o target/wasm32-wasip1/release-wasm/$$plugin_name.wasm; \
+			cp target/wasm32-wasip1/release-wasm/$$plugin_name.wasm frontend/public/plugins/$$plugin_name.wasm
+			mkdir -p tui-plugins
+			cp target/wasm32-wasip1/release-wasm/$$plugin_name.wasm tui-plugins/$$plugin_name.wasm
 		fi
 	done
 

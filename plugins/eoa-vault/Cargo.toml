@@ -13,5 +13,10 @@ tracing = { workspace = true }
 tracing-subscriber = { workspace = true }
 futures = { workspace = true }
 
-[profile.release]
-opt-level = "z"
+[package.metadata.wasm-pack.profile.release]
+wasm-opt = [
+    "-O",
+    "--debuginfo",
+    "--enable-bulk-memory",
+    "--enable-nontrapping-float-to-int",
+]

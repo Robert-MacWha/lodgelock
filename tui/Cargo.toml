@@ -1,0 +1,20 @@
+[package]
+name = "tui"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "tlock-tui"
+path = "src/main.rs"
+
+[dependencies]
+host = { workspace = true }
+tlock-hdk = { workspace = true }
+anyhow = { workspace = true }
+hex = { workspace = true }
+
+ratatui = "0.29"
+crossterm = "0.28"
+tokio = { version = "1", features = ["full"] }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }

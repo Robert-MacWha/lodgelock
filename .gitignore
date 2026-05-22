@@ -5,3 +5,4 @@ profile.json.gz
 .claude
 .vscode
 .chrome-unsafe-profile
+tui-plugins/
