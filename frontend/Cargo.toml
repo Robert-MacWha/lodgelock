@@ -17,7 +17,7 @@ erc20s = { workspace = true }
 futures = { workspace = true }
 gloo-timers = { workspace = true }
 host = { workspace = true }
-serde = { workspace = true, features = [ "derive" ] }
+serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true }
 tlock-hdk = { workspace = true }
 wasm-bindgen = { workspace = true }
@@ -26,12 +26,13 @@ web-sys = { workspace = true, features = [
     "Blob",
     "Url",
     "HtmlAnchorElement",
-    "Document"
+    "Document",
 ] }
 uuid = { workspace = true }
 hex = { workspace = true }
 console_error_panic_hook = { workspace = true }
 reqwest = { workspace = true }
+getrandom_02 = { package = "getrandom", version = "0.2", features = ["js"] }
 
 [package.metadata.wasm-pack.profile.dev]
 wasm-opt = false

@@ -22,17 +22,22 @@ resolver = "2"
 pedantic = { level = "warn", priority = -1 }
 
 [workspace.dependencies]
-alloy = { version = "1.4", features = ["wasm-bindgen", "json-rpc", "rpc-types-trace", "eip712"] }
-alloy-consensus = { version = "1.4" }
+alloy = { version = "1.8", features = [
+    "wasm-bindgen",
+    "json-rpc",
+    "rpc-types-trace",
+    "eip712",
+] }
+alloy-consensus = { version = "1.8" }
 anyhow = "1"
 async-trait = "0.1"
 base64 = "0.22"
-dioxus = { version = "=0.7.1" }
+dioxus = { version = "=0.7.6" }
 futures = "0.3"
 gloo-timers = { version = "0.3", features = ["futures"] }
 host = { path = "./crates/host" }
 rand = "0.9"
-reqwest = "0.12"
+reqwest = { version = "0.13", features = ["json"] }
 revm = { version = "33.1.0", default-features = false }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
@@ -45,7 +50,7 @@ erc20s = { path = "./crates/erc20s" }
 tower-service = "0.3"
 tracing = "0.1"
 tracing-subscriber = "0.3"
-uuid = { version = "1", features = [ "v4", "serde", "js" ] } 
+uuid = { version = "1", features = ["v4", "serde", "js"] }
 wasm-bindgen = "0.2"
 wasmi-plugin-hdk = "0.1"
 wasmi-plugin-pdk = "0.1"
@@ -54,6 +59,7 @@ hex = "0.4"
 chrono = "0.4"
 console_error_panic_hook = "0.1"
 event-listener = "5"
+js-sys = "=0.3.85"
 
 [profile.release]
 lto = "thin"
@@ -77,7 +83,7 @@ inherits = "dev"
 inherits = "dev"
 
 [patch.crates-io]
-wasmi-plugin-hdk = { git = "https://github.com/Robert-MacWha/wasmi-plugin-framework", branch = "wasmer-shared-memory-test" }
-wasmi-plugin-pdk = { git = "https://github.com/Robert-MacWha/wasmi-plugin-framework", branch = "wasmer-shared-memory-test" }
-# wasmi-plugin-hdk = { path = "../wasmi-plugin-framework/crates/wasmi-plugin-hdk" }
-# wasmi-plugin-pdk = { path = "../wasmi-plugin-framework/crates/wasmi-plugin-pdk" }
+# wasmi-plugin-hdk = { git = "https://github.com/Robert-MacWha/wasmi-plugin-framework", branch = "wasmer-shared-memory-test" }
+# wasmi-plugin-pdk = { git = "https://github.com/Robert-MacWha/wasmi-plugin-framework", branch = "wasmer-shared-memory-test" }
+wasmi-plugin-hdk = { path = "../wasmi-plugin-framework/crates/wasmi-plugin-hdk" }
+wasmi-plugin-pdk = { path = "../wasmi-plugin-framework/crates/wasmi-plugin-pdk" }
