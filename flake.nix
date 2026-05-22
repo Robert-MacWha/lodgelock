@@ -37,7 +37,10 @@
             "llvm-tools"
             "rust-analyzer"
           ];
-          targets = [ "wasm32-unknown-unknown" ];
+          targets = [
+            "wasm32-unknown-unknown"
+            "wasm32-wasip1"
+          ];
         };
 
         rustfmtNightly = pkgs.rust-bin.nightly.latest.rustfmt;
@@ -64,10 +67,10 @@
               pkgs.xdotool
               pkgs.openssl
               pkgs.binaryen
-              unstablePkgs.wasm-bindgen-cli_0_2_121
+              unstablePkgs.wasm-bindgen-cli_0_2_118
             ];
 
-            env.WASM_BINDGEN = "${unstablePkgs.wasm-bindgen-cli_0_2_106}/bin/wasm-bindgen";
+            env.WASM_BINDGEN = "${unstablePkgs.wasm-bindgen-cli_0_2_118}/bin/wasm-bindgen";
           };
         };
       }
