@@ -399,6 +399,14 @@ pub mod vault {
     );
 
     rpc_method!(
+        /// Transfer an amount of some asset from one vault to another. This method
+        /// should be preferred over `get_deposit_address` when transfering funds
+        /// between plugins, as it allows the receiving vault to verify and accept
+        /// the incoming transfer.
+        vault_transfer_from, TransferFrom, (VaultId, VaultId, AccountId, AssetId, U256), ()
+    );
+
+    rpc_method!(
         /// Gets the deposit address for a particular account and asset. Accounts can
         /// also use this to block deposits from unsupported assets or asset classes.
         ///
@@ -411,19 +419,6 @@ pub mod vault {
         /// as might the supported assets.
         vault_get_deposit_address, GetDepositAddress, (VaultId, AssetId), AccountId
     );
-
-    // TODO: Whether this method makes sense. We can't guarantee it will be
-    // called on every deposit, so vaults will need to reconcile deposits
-    // themselves anyway. It may be better to add callbacks vaults can
-    // register for when deposits are made rather than trusting depositors
-    // to call this method. rpc_method!(
-    //     /// Callback for when an amount is deposited in an account.
-    //     ///
-    //     /// Acts as a hint to the vault plugin that it should handle the
-    // deposit     /// and update its internal state accordingly. The vault
-    // cannot assume     /// that this method will always be called for
-    // every deposit.     vault_on_deposit, OnDeposit, (VaultId, AccountId,
-    // AssetId), () );
 }
 
 /// Coordinators act as intermediaries between plugins and vaults. They provide
@@ -524,3 +519,5 @@ pub mod page {
         page_on_update, OnUpdate, (PageId, PageEvent), ()
     );
 }
+
+pub mod tui {}

@@ -571,7 +571,6 @@ fn states_dropdown() -> Element {
                                             async move {
                                                 blur_active_element();
 
-
                                                 let state_path = format!("{}/{}.json", states_folder, state_name);
                                                 if let Err(e) = handle_load_state(&state_path).await {
                                                     error!("Failed to load state {}: {:?}", state_name, e);
