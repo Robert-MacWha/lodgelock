@@ -1,5 +1,6 @@
+use alloy::transports::BoxFuture;
 use serde_json::Value;
-use tlock_api::{RpcMethod, alloy::transports::BoxFuture};
+use tlock_api::RpcMethod;
 use wasmi_plugin_hdk::{host_handler::HostHandler, instance_id::InstanceId};
 use wasmi_plugin_pdk::{router::MaybeSend, rpc_message::RpcError};
 

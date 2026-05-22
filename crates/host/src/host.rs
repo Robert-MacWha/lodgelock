@@ -6,7 +6,7 @@ use std::{
     usize,
 };
 
-use alloy::{primitives::U256, transports::http::reqwest};
+use alloy::primitives::U256;
 use futures::channel::{mpsc::UnboundedSender, oneshot};
 use thiserror::Error;
 use tlock_hdk::{

@@ -1,4 +1,5 @@
 use alloy::rpc;
+use alloy::{eips::BlockId, network::Network};
 use revm::{
     DatabaseRef,
     context::DBErrorMarker,
@@ -9,11 +10,7 @@ use serde::Deserialize;
 use serde_json::{Value, json};
 use thiserror::Error;
 use tlock_pdk::{
-    tlock_api::{
-        RpcMethod,
-        alloy::{eips::BlockId, network::Network},
-        host,
-    },
+    tlock_api::{RpcMethod, host},
     wasmi_plugin_pdk::{
         rpc_message::{RpcError, RpcErrorContext},
         transport::Transport,

@@ -8,6 +8,7 @@
 //! is intended purely for demonstration and testing.
 use std::io::stderr;
 
+use alloy::primitives::U256;
 use alloy::{
     primitives::{Address, FixedBytes},
     providers::{Provider, ProviderBuilder},
@@ -23,7 +24,6 @@ use tlock_pdk::{
     state::StateExt,
     tlock_api::{
         RpcMethod,
-        alloy::primitives::U256,
         caip::{AccountId, AssetId, AssetType, ChainId},
         component::{Component, container, heading, text},
         coordinator,

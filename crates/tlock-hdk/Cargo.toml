@@ -10,3 +10,4 @@ tlock-pdk = { workspace = true }
 tracing = { workspace = true }
 wasmi-plugin-hdk = { workspace = true }
 wasmi-plugin-pdk = { workspace = true }
+alloy = { workspace = true }

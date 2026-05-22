@@ -1,3 +1,4 @@
+use alloy::network::Network;
 use revm::{
     DatabaseRef,
     context::DBErrorMarker,
@@ -8,7 +9,6 @@ use serde::{Serialize, de::DeserializeOwned};
 use thiserror::Error;
 use tlock_pdk::{
     state::{self, StateExt},
-    tlock_api::alloy::network::Network,
     wasmi_plugin_pdk::transport::Transport,
 };
 

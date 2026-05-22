@@ -1,4 +1,3 @@
-use alloy::transports::http::reqwest;
 use serde::{Deserialize, Serialize};
 use tlock_hdk::{tlock_api::entities::EntityId, wasmi_plugin_hdk::plugin_id::PluginId};
 

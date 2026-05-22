@@ -1,13 +1,4 @@
-use revm::{
-    context::{BlockEnv, TxEnv, result::ExecutionResult},
-    context_interface::block::BlobExcessGasAndPrice,
-    primitives::{
-        Address, B256, Log, TxKind, U256,
-        alloy_primitives::{B64, BlockHash, Bloom, BloomInput, TxHash},
-        hardfork::SpecId,
-    },
-};
-use tlock_pdk::tlock_api::alloy::{
+use alloy::{
     self,
     consensus::{
         EMPTY_OMMER_ROOT_HASH, Eip658Value, Receipt, ReceiptEnvelope, Transaction, TxEnvelope,
@@ -16,6 +7,15 @@ use tlock_pdk::tlock_api::alloy::{
         transaction::Recovered,
     },
     rpc::{self},
+};
+use revm::{
+    context::{BlockEnv, TxEnv, result::ExecutionResult},
+    context_interface::block::BlobExcessGasAndPrice,
+    primitives::{
+        Address, B256, Log, TxKind, U256,
+        alloy_primitives::{B64, BlockHash, Bloom, BloomInput, TxHash},
+        hardfork::SpecId,
+    },
 };
 
 use crate::chain::SimulatedBlock;

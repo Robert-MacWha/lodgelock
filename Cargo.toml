@@ -9,9 +9,9 @@ members = [
     "frontend",
     "plugins/eoa-coordinator",
     "plugins/eoa-vault",
-    # "plugins/plugin-template",
+    "plugins/plugin-template",
     "plugins/revm-provider",
-    # "plugins/rpc-provider",
+    "plugins/rpc-provider",
     "plugins/staking",
     "plugins/uniswap-v2",
 ]
@@ -22,11 +22,9 @@ resolver = "2"
 pedantic = { level = "warn", priority = -1 }
 
 [workspace.dependencies]
-alloy = { version = "1.8", features = [
-    "wasm-bindgen",
+alloy = { version = "1.8", default-features = false, features = [
+    "essentials",
     "json-rpc",
-    "rpc-types-trace",
-    "eip712",
 ] }
 alloy-consensus = { version = "1.8" }
 anyhow = "1"

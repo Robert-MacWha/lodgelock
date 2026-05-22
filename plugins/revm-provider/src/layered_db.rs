@@ -1,10 +1,10 @@
+use alloy::network::Network;
 use revm::{
     DatabaseRef,
     primitives::{Address, B256},
     state::{AccountInfo, Bytecode, EvmState},
 };
 use serde::{Deserialize, Serialize};
-use tlock_pdk::tlock_api::alloy::network::Network;
 
 /// A layered database that maintains multiple layers of EVM state stacked
 /// on top of each other. Reads first check the layers in order before falling

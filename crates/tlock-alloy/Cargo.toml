@@ -4,9 +4,15 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-alloy = { workspace = true, features = ["k256"] }
+alloy = { workspace = true, features = [
+    "k256",
+    "dyn-abi",
+    "eip712",
+    "provider-trace-api",
+] }
 serde = { workspace = true }
 serde_json = { workspace = true }
 tlock-pdk = { workspace = true }
 tower-service = { workspace = true }
 tracing = { workspace = true }
+getrandom_02 = { package = "getrandom", version = "0.2", features = ["js"] }

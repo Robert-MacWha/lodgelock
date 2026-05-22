@@ -6,7 +6,6 @@ pub mod caip;
 pub mod component;
 pub mod domains;
 pub mod entities;
-pub use alloy;
 pub mod rpc_batch;
 
 // TODO: Add a signer trait just for signing raw messages? Not sure if it'd work

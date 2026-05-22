@@ -53,6 +53,9 @@
               rustToolchain
               rustfmtNightly
 
+              pkgs.wabt
+              pkgs.wasm-tools
+
               # Dioxus CLI
               pkgs.dioxus-cli
               pkgs.wabt

@@ -1,5 +1,13 @@
 use std::collections::BTreeMap;
 
+use alloy::{
+    eips::{BlockId, BlockNumberOrTag},
+    network::{Ethereum, Network},
+    rpc::{
+        self,
+        types::{BlockOverrides, state::StateOverride},
+    },
+};
 use erc20s::get_erc20_by_address;
 use revm::{
     Context, DatabaseRef, ExecuteEvm, MainBuilder, MainContext,
@@ -14,14 +22,6 @@ use serde::{Deserialize, Serialize};
 use thiserror::Error;
 use tlock_pdk::{
     state::{LockedState, StateExt},
-    tlock_api::alloy::{
-        eips::{BlockId, BlockNumberOrTag},
-        network::{Ethereum, Network},
-        rpc::{
-            self,
-            types::{BlockOverrides, state::StateOverride},
-        },
-    },
     wasmi_plugin_pdk::{
         rpc_message::{RpcError, RpcErrorContext, ToRpcResult},
         transport::{Transport, TransportError},

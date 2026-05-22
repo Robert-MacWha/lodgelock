@@ -1,3 +1,13 @@
+use alloy::{
+    self,
+    consensus::{TxEnvelope, transaction::SignerRecoverable},
+    eips::{BlockId, BlockNumberOrTag},
+    rlp::Decodable,
+    rpc::{
+        self,
+        types::{BlockOverrides, BlockTransactions, BlockTransactionsKind, state::StateOverride},
+    },
+};
 use alloy_consensus::transaction::Recovered;
 use revm::{
     DatabaseRef,
@@ -12,18 +22,6 @@ use serde::{Deserialize, Serialize};
 use thiserror::Error;
 use tlock_pdk::{
     state::StateExt,
-    tlock_api::alloy::{
-        self,
-        consensus::{TxEnvelope, transaction::SignerRecoverable},
-        eips::{BlockId, BlockNumberOrTag},
-        rlp::Decodable,
-        rpc::{
-            self,
-            types::{
-                BlockOverrides, BlockTransactions, BlockTransactionsKind, state::StateOverride,
-            },
-        },
-    },
     wasmi_plugin_pdk::{rpc_message::RpcError, transport::Transport},
 };
 use tracing::info;
