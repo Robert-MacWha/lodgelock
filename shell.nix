@@ -5,7 +5,7 @@ let
     ];
   };
   rustToolchain = pkgs.rust-bin.stable.latest.default.override {
-    extensions = [ "rust-src" ];
+    extensions = [ "rust-src" "rust-analyzer" ];
     targets = [
       "wasm32-wasip1"
       "wasm32-unknown-unknown"
@@ -41,7 +41,6 @@ in
 pkgs.mkShell {
   packages = with pkgs; [
     rustToolchain
-    rust-analyzer
     cargo-sort
     cargo-machete
     samply
