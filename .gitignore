@@ -6,3 +6,5 @@ profile.json.gz
 .vscode
 .chrome-unsafe-profile
 tui-plugins/
+tui-data/
+tlock-tui.log

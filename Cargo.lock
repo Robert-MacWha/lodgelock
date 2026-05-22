@@ -4778,12 +4778,14 @@ name = "host"
 version = "0.1.0"
 dependencies = [
  "alloy",
+ "async-trait",
  "base64",
  "chrono",
  "event-listener",
  "futures",
  "reqwest 0.13.3",
  "serde",
+ "serde_json",
  "thiserror 2.0.18",
  "tlock-hdk",
  "tracing",

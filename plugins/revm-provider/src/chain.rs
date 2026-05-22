@@ -553,7 +553,8 @@ fn block_id_to_number(state: &ChainState, block: &BlockId) -> Option<u64> {
     // TODO: Add cases for remaining tags (finalized, safe, earliest) and hashes
     match block {
         BlockId::Number(BlockNumberOrTag::Pending) => {
-            Some(state.pending.env.number.saturating_to())
+            let latest: u64 = state.pending.env.number.saturating_to();
+            Some(latest.saturating_sub(1))
         }
         BlockId::Number(BlockNumberOrTag::Latest) => {
             let latest: u64 = state.pending.env.number.saturating_to();

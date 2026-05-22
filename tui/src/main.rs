@@ -18,6 +18,7 @@ use crossterm::{
 use host::{
     host::{Host, UserRequest},
     host_state::PluginSource,
+    FsDatabase,
 };
 use ratatui::{backend::CrosstermBackend, Terminal};
 use tlock_hdk::tlock_api::{
@@ -29,6 +30,7 @@ use page::PageItem;
 use render::{page_ids_in_root, root_items, selectable_root_indices};
 
 const PLUGINS_DIR: &str = "./tui-plugins";
+const DATABASE_DIR: &str = "./tui-data";
 
 pub enum Screen {
     Root,
@@ -75,7 +77,9 @@ impl App {
         match &self.screen {
             Screen::FulfillRequest { request } => {
                 let count = candidate_entities(&self.host, request).len() + 1;
-                if count > 0 { self.cursor = (self.cursor + 1) % count; }
+                if count > 0 {
+                    self.cursor = (self.cursor + 1) % count;
+                }
             }
             Screen::BrowsePlugins { files } => {
                 let count = files.len();
@@ -120,7 +124,11 @@ impl App {
             Screen::FulfillRequest { request } => {
                 let count = candidate_entities(&self.host, request).len() + 1;
                 if count > 0 {
-                    self.cursor = if self.cursor == 0 { count - 1 } else { self.cursor - 1 };
+                    self.cursor = if self.cursor == 0 {
+                        count - 1
+                    } else {
+                        self.cursor - 1
+                    };
                 }
             }
             Screen::BrowsePlugins { files } => {
@@ -232,7 +240,10 @@ async fn main() -> Result<()> {
     let backend = CrosstermBackend::new(stdout);
     let mut terminal = Terminal::new(backend)?;
 
-    let host = Arc::new(Host::new());
+    let database_path = Path::new(DATABASE_DIR);
+    let _ = std::fs::create_dir_all(database_path);
+    let db = Arc::new(FsDatabase::new(database_path)?);
+    let host = Host::new(db).await.map_err(|e| anyhow::anyhow!("{e}"))?;
     let mut app = App::new(host);
 
     let result = run(&mut terminal, &mut app).await;
@@ -438,13 +449,21 @@ fn handle_fulfill_request(app: &mut App, code: KeyCode) {
             app.cursor = 0;
             return;
         }
-        KeyCode::Char('j') | KeyCode::Down => { app.cursor_down(); return; }
-        KeyCode::Char('k') | KeyCode::Up => { app.cursor_up(); return; }
+        KeyCode::Char('j') | KeyCode::Down => {
+            app.cursor_down();
+            return;
+        }
+        KeyCode::Char('k') | KeyCode::Up => {
+            app.cursor_up();
+            return;
+        }
         KeyCode::Enter => {}
         _ => return,
     }
 
-    let Screen::FulfillRequest { request } = &app.screen else { return };
+    let Screen::FulfillRequest { request } = &app.screen else {
+        return;
+    };
     let request = request.clone();
     let candidates = candidate_entities(&app.host, &request);
     let cursor = app.cursor;

@@ -1,5 +1,5 @@
 /// https://github.com/foundry-rs/foundry/blob/a27da27d61dfedfed9c975cac001a48b0f398a55/crates/anvil/core/src/eth/mod.rs
-/// Licensed under Apache-2.0 OR MIT.  Copyright (c) 2021 Georgios
+/// Licensed under Apache-2.0 OR MIT. Copyright (c) 2021 Georgios
 /// Konstantopoulos Copied and adapter for tlock-rs.
 ///
 /// Modifications were required to allow compilation to wasm32-unknown-unknown

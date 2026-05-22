@@ -23,14 +23,18 @@ use tlock_hdk::{
         vault::{self},
     },
     wasmi_plugin_hdk::{self, instance_id::InstanceId, plugin::Plugin, plugin_id::PluginId},
-    wasmi_plugin_pdk::rpc_message::{RpcError, RpcErrorContext},
+    wasmi_plugin_pdk::rpc_message::{RpcError, RpcErrorContext, ToRpcResult},
 };
 use tracing::{info, warn};
 use uuid::Uuid;
 
-use crate::host_state::{HostState, PluginData, PluginSource};
+use crate::{
+    database::{Database, HostDatabase},
+    host_state::PluginSource,
+};
 
 pub struct Host {
+    database: Arc<dyn Database>,
     plugins: Mutex<HashMap<PluginId, Plugin>>,
     plugin_sources: Mutex<HashMap<PluginId, PluginSource>>,
     entities: Mutex<HashMap<EntityId, PluginId>>,
@@ -110,20 +114,20 @@ pub enum PluginError {
     PdkError(#[from] wasmi_plugin_hdk::plugin::PluginError),
     #[error("Rpc error: {0}")]
     RpcError(#[from] RpcError),
-}
-
-impl Default for Host {
-    fn default() -> Self {
-        Self::new()
-    }
+    #[error("Database error: {0}")]
+    DatabaseError(#[from] crate::database::DatabaseError),
 }
 
 impl Host {
-    pub fn new() -> Self {
-        Self {
+    pub async fn new(database: Arc<dyn Database>) -> Result<Arc<Self>, PluginError> {
+        let entities: HashMap<EntityId, PluginId> =
+            database.get_entities().await?.into_iter().collect();
+
+        let host = Arc::new(Self {
+            database: database.clone(),
             plugins: Mutex::new(HashMap::new()),
             plugin_sources: Mutex::new(HashMap::new()),
-            entities: Mutex::new(HashMap::new()),
+            entities: Mutex::new(entities),
             state: Mutex::new(HashMap::new()),
             locks: Mutex::new(HashMap::new()),
             interfaces: Mutex::new(HashMap::new()),
@@ -131,56 +135,19 @@ impl Host {
             user_request_senders: Mutex::new(HashMap::new()),
             events: Mutex::new(Vec::new()),
             observers: Mutex::new(Vec::new()),
-        }
-    }
+        });
 
-    pub async fn from_state(host_state: HostState) -> Result<Arc<Self>, PluginError> {
-        let entities: HashMap<EntityId, PluginId> = host_state.entities.into_iter().collect();
-        let state: HashMap<(PluginId, String), Vec<u8>> = host_state.state.into_iter().collect();
-
-        let host = Self {
-            plugins: Mutex::new(HashMap::new()),
-            plugin_sources: Mutex::new(HashMap::new()),
-            entities: Mutex::new(entities),
-            state: Mutex::new(state),
-            locks: Mutex::new(HashMap::new()),
-            interfaces: Mutex::new(HashMap::new()),
-            user_requests: Mutex::new(Vec::new()),
-            user_request_senders: Mutex::new(HashMap::new()),
-            events: Mutex::new(Vec::new()),
-            observers: Mutex::new(Vec::new()),
-        };
-        let host = Arc::new(host);
-
-        for plugin_data in host_state.plugins {
-            host.load_plugin(plugin_data.source, &plugin_data.name)
-                .await?;
+        for plugin_id in database.get_plugins().await? {
+            if let Some(source) = database.get_plugin_source(plugin_id).await? {
+                let name = database
+                    .get_plugin_name(plugin_id)
+                    .await?
+                    .unwrap_or_default();
+                host.load_plugin(source, &name).await?;
+            }
         }
 
         Ok(host)
-    }
-
-    pub fn state(&self) -> HostState {
-        let plugins = self.plugins.lock().unwrap();
-        let plugin_sources = self.plugin_sources.lock().unwrap();
-
-        let plugins_data = plugins
-            .iter()
-            .map(|(id, plugin)| PluginData {
-                id: *id,
-                name: plugin.name().to_string(),
-                source: plugin_sources
-                    .get(id)
-                    .cloned()
-                    .expect("Plugin source not found"),
-            })
-            .collect();
-
-        HostState {
-            plugins: plugins_data,
-            entities: self.entities.lock().unwrap().clone().into_iter().collect(),
-            state: self.state.lock().unwrap().clone().into_iter().collect(),
-        }
     }
 
     pub fn subscribe(&self, tx: UnboundedSender<()>) {
@@ -245,7 +212,19 @@ impl Host {
             .unwrap()
             .insert(plugin.id(), plugin.clone());
 
-        self.plugin_sources.lock().unwrap().insert(id, source);
+        self.plugin_sources
+            .lock()
+            .unwrap()
+            .insert(id, source.clone());
+
+        let mut all_ids = self.database.get_plugins().await?;
+        if !all_ids.contains(&id) {
+            all_ids.push(id);
+            self.database.set_plugins(&all_ids).await?;
+        }
+        self.database.set_plugin_name(id, name).await?;
+        self.database.set_plugin_source(id, &source).await?;
+
         info!("Loaded plugin '{}'", name);
         Ok(plugin)
     }
@@ -464,8 +443,12 @@ impl Host {
             Domain::Coordinator => CoordinatorId::new().into(),
         };
 
-        let mut entities = self.entities.lock().unwrap();
-        entities.insert(entity_id, instance_id.plugin);
+        let snapshot = {
+            let mut entities = self.entities.lock().unwrap();
+            entities.insert(entity_id, instance_id.plugin);
+            entities.iter().map(|(e, p)| (*e, *p)).collect::<Vec<_>>()
+        };
+        self.database.set_entities(&snapshot).await.rpc_err()?;
         Ok(entity_id)
     }
 
@@ -595,9 +578,9 @@ impl Host {
     ) -> Result<Vec<u8>, RpcError> {
         let state_key = (instance_id.plugin, key);
 
-        //? Iteratively wait for the lock to be released and our turn to access the key
         loop {
-            let listener = {
+            // locks guard is scoped to this block so it's dropped before any await
+            let maybe_listener = {
                 let locks = self.locks.lock().unwrap();
                 match locks.get(&state_key) {
                     Some((holder, _)) if holder == instance_id => {
@@ -606,18 +589,26 @@ impl Host {
                             state_key.1
                         )));
                     }
-                    Some((_holder, event)) => {
-                        // Different holder - wait
-                        event.listen()
-                    }
-                    None => {
-                        // Not held, read it
-                        let state = self.state.lock().unwrap();
-                        return Ok(state.get(&state_key).cloned().unwrap_or_default());
-                    }
+                    Some((_holder, event)) => Some(event.listen()),
+                    None => None,
                 }
             };
-            listener.await;
+
+            match maybe_listener {
+                Some(listener) => listener.await,
+                None => {
+                    let in_memory = self.state.lock().unwrap().get(&state_key).cloned();
+                    return match in_memory {
+                        Some(v) => Ok(v),
+                        None => Ok(self
+                            .database
+                            .get_plugin_state(state_key.0, &state_key.1)
+                            .await
+                            .unwrap_or_default()
+                            .unwrap_or_default()),
+                    };
+                }
+            }
         }
     }
 
@@ -628,11 +619,10 @@ impl Host {
     ) -> Result<Vec<u8>, RpcError> {
         let state_key = (instance_id.plugin, key);
 
-        //? Iteratively wait for the lock to be released and our turn to access the key
         loop {
-            let listener = {
+            // locks guard is scoped to this block so it's dropped before any await
+            let maybe_listener = {
                 let mut locks = self.locks.lock().unwrap();
-
                 match locks.get(&state_key) {
                     Some((holder, _)) if holder == instance_id => {
                         return Err(RpcError::custom(format!(
@@ -640,22 +630,32 @@ impl Host {
                             state_key.1
                         )));
                     }
-                    Some((_holder, event)) => {
-                        // Different holder - wait
-                        event.listen()
-                    }
+                    Some((_holder, event)) => Some(event.listen()),
                     None => {
-                        // Not held, acquire it
                         locks.insert(
                             state_key.clone(),
                             (*instance_id, Arc::new(event_listener::Event::new())),
                         );
-                        let state = self.state.lock().unwrap();
-                        return Ok(state.get(&state_key).cloned().unwrap_or_default());
+                        None
                     }
                 }
             };
-            listener.await;
+
+            match maybe_listener {
+                Some(listener) => listener.await,
+                None => {
+                    let in_memory = self.state.lock().unwrap().get(&state_key).cloned();
+                    return match in_memory {
+                        Some(v) => Ok(v),
+                        None => Ok(self
+                            .database
+                            .get_plugin_state(state_key.0, &state_key.1)
+                            .await
+                            .unwrap_or_default()
+                            .unwrap_or_default()),
+                    };
+                }
+            }
         }
     }
 
@@ -675,8 +675,14 @@ impl Host {
             }
         }
 
-        let mut state = self.state.lock().unwrap();
-        state.insert(state_key, value);
+        {
+            let mut state = self.state.lock().unwrap();
+            state.insert(state_key.clone(), value.clone());
+        }
+        self.database
+            .set_plugin_state(state_key.0, &state_key.1, &value)
+            .await
+            .rpc_err()?;
         Ok(Ok(()))
     }
 

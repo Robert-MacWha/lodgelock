@@ -1,19 +1,4 @@
 use serde::{Deserialize, Serialize};
-use tlock_hdk::{tlock_api::entities::EntityId, wasmi_plugin_hdk::plugin_id::PluginId};
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct HostState {
-    pub plugins: Vec<PluginData>,
-    pub entities: Vec<(EntityId, PluginId)>,
-    pub state: Vec<((PluginId, String), Vec<u8>)>,
-}
-
-#[derive(Serialize, Deserialize, Clone, Debug)]
-pub struct PluginData {
-    pub id: PluginId,
-    pub name: String,
-    pub source: PluginSource,
-}
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub enum PluginSource {
