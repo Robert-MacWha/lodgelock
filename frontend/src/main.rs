@@ -10,8 +10,8 @@ use frontend::{
         host::HostContext,
         toast::{ToastContext, ToastKind, toast_container},
     },
-    focus_helper::blur_active_element,
 };
+use host::MemoryDatabase;
 use host::{host::Host, host_state::PluginSource};
 use tlock_hdk::tlock_api::{
     entities::{EntityId, PageId},
@@ -36,9 +36,23 @@ fn main() {
 
 #[component]
 fn app() -> Element {
-    let host = Arc::new(Host::new());
-    let host_context = HostContext::new(host.clone());
-    use_context_provider(|| host_context);
+    let host = use_resource(|| async {
+        let db = Arc::new(MemoryDatabase::default());
+        let host = Host::new(db).await.unwrap();
+        host
+    });
+
+    match host.read().as_ref() {
+        None => {
+            return rsx! {
+                p { "Loading host..." }
+            };
+        }
+        Some(host) => {
+            let host_context = HostContext::new(host.clone());
+            use_context_provider(|| host_context);
+        }
+    };
 
     let ui_signals = UiContext {
         show_request_sidebar: use_signal(|| false),
@@ -186,7 +200,6 @@ fn sidebar_component() -> Element {
                 }
                 h1 { class: "menu-title text-2xl text-primary ps-0 font-heading", "Lodgelock Demo" }
             }
-            states_dropdown {}
             div { class: "divider" }
             h2 { class: "menu-title", "Pages" }
             ul {
@@ -533,100 +546,6 @@ fn plugins_modal() -> Element {
             }
         }
     )
-}
-
-#[component]
-fn states_dropdown() -> Element {
-    let states_folder = asset!("/public/states");
-    let manifest = use_resource(move || async move {
-        let manifest_path = format!("{}/manifest.json", states_folder);
-        let manifest = dioxus::asset_resolver::read_asset_bytes(&manifest_path)
-            .await
-            .unwrap();
-        let manifest: Vec<String> = serde_json::from_slice(&manifest).unwrap();
-        manifest
-    });
-
-    rsx! {
-        if let Some(states) = manifest.read().as_ref() {
-            div { class: "dropdown",
-                div {
-                    tabindex: "0",
-                    role: "button",
-                    class: "btn btn-primary w-full",
-                    "Load Demo"
-                }
-                ul {
-                    tabindex: "-1",
-                    class: "dropdown-content menu w-full bg-base-100 rounded-box z-1 p-2 shadow-sm",
-                    for state_name in states.iter() {
-                        {
-                            let state_name = state_name.clone();
-                            rsx! {
-                                li { key: "state-{state_name}",
-                                    button {
-                                        class: "text-sm break-all",
-                                        onclick: move |_| {
-                                            let state_name = state_name.clone();
-                                            async move {
-                                                blur_active_element();
-
-                                                let state_path = format!("{}/{}.json", states_folder, state_name);
-                                                if let Err(e) = handle_load_state(&state_path).await {
-                                                    error!("Failed to load state {}: {:?}", state_name, e);
-                                                } else {
-                                                    info!("Successfully loaded state {}", state_name);
-                                                }
-                                            }
-                                        },
-                                        "{state_name}"
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        } else {
-            p { "Loading states..." }
-        }
-    }
-}
-
-async fn handle_load_state(path: &str) -> anyhow::Result<()> {
-    info!("Loading state from path: {}", path);
-
-    let full_url = get_absolute_url(path);
-
-    // Use reqwest to fetch the bytes from the public URL
-    let response = reqwest::get(&full_url)
-        .await
-        .map_err(|e| anyhow!("Request failed for {}: {:?}", full_url, e))?;
-
-    if !response.status().is_success() {
-        return Err(anyhow!(
-            "Server returned error {}: {}",
-            response.status(),
-            full_url
-        ));
-    }
-
-    let state_bytes = response
-        .bytes()
-        .await
-        .map_err(|e| anyhow!("Failed to read response bytes: {:?}", e))?;
-
-    let state: host::host_state::HostState = serde_json::from_slice(&state_bytes)
-        .map_err(|e| anyhow!("Failed to deserialize state JSON: {:?}", e))?;
-
-    let host = Host::from_state(state)
-        .await
-        .map_err(|e| anyhow!("Failed to create host from state: {:?}", e))?;
-
-    let mut ctx: HostContext = consume_context();
-    ctx.set_host(host);
-
-    Ok(())
 }
 
 async fn handle_load_plugin(path: String) -> anyhow::Result<()> {
