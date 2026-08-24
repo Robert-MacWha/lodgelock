@@ -2,7 +2,10 @@ use async_trait::async_trait;
 use serde::{Serialize, de::DeserializeOwned};
 use wasmi_plugin_pdk::rpc_message::{RpcError, RpcErrorContext};
 
+pub mod metadata;
 pub mod caip;
+
+pub use metadata::{DataCategory, Decentralization, Openness, PluginMetadata, Privacy, Security, TrustChannel};
 pub mod component;
 pub mod domains;
 pub mod entities;
