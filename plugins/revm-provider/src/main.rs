@@ -1,3 +1,25 @@
+// --- Plugin Metadata -----------------------------------------------------------
+
+/// Marker type for the ReVM provider plugin's metadata.
+impl tlock_hdk::MetadataProvider for RevmProviderMetadata {
+    fn metadata(&self) -> tlock_hdk::PluginMetadata {
+        tlock_hdk::PluginMetadata::new()
+            .open_source(true)
+            .audited_contract(false)
+            .safe_harbor(false)
+            .bug_bounty(false)
+            .centralized_infrastructure(false)
+            .reports_data(false)
+            .source_url("https://github.com/Robert-MacWha/lodgelock")
+            .license("MIT")
+            .version("0.1.0")
+            .description("ReVM provider plugin for local EVM execution without external RPC.")
+    }
+}
+
+/// Convenience accessor — returns the ReVM provider plugin's metadata.
+    RevmProviderMetadata.metadata()
+}
 use std::{collections::HashMap, io::stderr};
 
 use alloy::{

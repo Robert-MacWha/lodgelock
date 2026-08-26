@@ -1,3 +1,25 @@
+// --- Plugin Metadata -----------------------------------------------------------
+
+/// Marker type for the EOA vault plugin's metadata.
+impl tlock_hdk::MetadataProvider for EoaVaultMetadata {
+    fn metadata(&self) -> tlock_hdk::PluginMetadata {
+        tlock_hdk::PluginMetadata::new()
+            .open_source(true)
+            .audited_contract(false)
+            .safe_harbor(false)
+            .bug_bounty(false)
+            .centralized_infrastructure(false)
+            .reports_data(false)
+            .source_url("https://github.com/Robert-MacWha/lodgelock")
+            .license("MIT")
+            .version("0.1.0")
+            .description("EOA vault plugin for managing externally owned account keys.")
+    }
+}
+
+/// Convenience accessor — returns the EOA vault plugin's metadata.
+    EoaVaultMetadata.metadata()
+}
 //! EOA Vault Plugin
 //!
 //! This is a simple exemplar vault plugin that manages an Externally Owned

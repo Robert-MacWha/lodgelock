@@ -1,3 +1,6 @@
+pub mod metadata;
+pub use metadata::{MetadataProvider, PluginMetadata};
+
 pub use tlock_api;
 pub use tracing;
 pub use wasmi_plugin_hdk;

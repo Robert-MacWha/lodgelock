@@ -1,3 +1,25 @@
+// --- Plugin Metadata -----------------------------------------------------------
+
+/// Marker type for the staking plugin's metadata.
+impl tlock_hdk::MetadataProvider for StakingPluginMetadata {
+    fn metadata(&self) -> tlock_hdk::PluginMetadata {
+        tlock_hdk::PluginMetadata::new()
+            .open_source(true)
+            .audited_contract(true)
+            .safe_harbor(false)
+            .bug_bounty(false)
+            .centralized_infrastructure(false)
+            .reports_data(false)
+            .source_url("https://github.com/Robert-MacWha/lodgelock")
+            .license("MIT")
+            .version("0.1.0")
+            .description("Staking plugin for interacting with on-chain staking contracts.")
+    }
+}
+
+/// Convenience accessor — returns the staking plugin's metadata.
+    StakingPluginMetadata.metadata()
+}
 //! Staking
 //!
 //! This plugin allows users to stake their ETH in a custodial vault. It
