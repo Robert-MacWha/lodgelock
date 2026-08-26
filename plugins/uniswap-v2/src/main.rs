@@ -1,3 +1,26 @@
+// --- Plugin Metadata -----------------------------------------------------------
+
+/// Marker type for the Uniswap V2 plugin's metadata.
+impl tlock_hdk::MetadataProvider for UniswapV2PluginMetadata {
+    fn metadata(&self) -> tlock_hdk::PluginMetadata {
+        tlock_hdk::PluginMetadata::new()
+            .open_source(true)
+            .audited_contract(true)
+            .safe_harbor(false)
+            .bug_bounty(true)
+            .centralized_infrastructure(false)
+            .reports_data(false)
+            .source_url("https://github.com/Robert-MacWha/lodgelock")
+            .audit_url("https://certik.foundation/projects/uniswap")
+            .license("MIT")
+            .version("0.1.0")
+            .description("Uniswap V2 plugin for interacting with Uniswap V2 contracts.")
+    }
+}
+
+/// Convenience accessor — returns the Uniswap V2 plugin's metadata.
+    UniswapV2PluginMetadata.metadata()
+}
 //! Uniswap V2 Plugin
 //!
 //! This plugin enables users to swap ERC20 tokens on Sepolia testnet using

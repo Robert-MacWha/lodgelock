@@ -1,3 +1,26 @@
+// --- Plugin Metadata -----------------------------------------------------------
+
+/// Marker type for the RPC provider plugin's metadata.
+impl tlock_hdk::MetadataProvider for RpcProviderMetadata {
+    fn metadata(&self) -> tlock_hdk::PluginMetadata {
+        tlock_hdk::PluginMetadata::new()
+            .open_source(true)
+            .audited_contract(false)
+            .safe_harbor(false)
+            .bug_bounty(false)
+            .centralized_infrastructure(true)
+            .centralized_service("RPC endpoint provider (Infura/Alchemy/etc.)")
+            .reports_data(false)
+            .source_url("https://github.com/Robert-MacWha/lodgelock")
+            .license("MIT")
+            .version("0.1.0")
+            .description("RPC provider plugin for connecting to remote Ethereum nodes.")
+    }
+}
+
+/// Convenience accessor — returns the RPC provider plugin's metadata.
+    RpcProviderMetadata.metadata()
+}
 use std::io::stderr;
 
 use alloy::{
